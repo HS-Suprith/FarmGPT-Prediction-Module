@@ -1,0 +1,36 @@
+python -m venv fgpt
+
+fgpt_env\Scripts\activate
+
+pip install flask
+
+change this code in app.py:
+
+from this:
+from flask import Flask, render_template, request, Markup
+
+to this:
+from flask import Flask, render_template, request
+from markupsafe import Markup
+
+pip install pandas==1.1.5
+
+pip install requests
+
+pip install torch
+
+pip install torchvision
+
+pip install numpy==1.19.5
+
+pip install scikit-learn==0.23.2
+
+add weather api key from OpenWeather in app.py at def weather_fetch(city_name):
+
+api_key = "2d35b4234e0c662d77b3123c2145fa25"
+
+python app.py
+
+
+
+

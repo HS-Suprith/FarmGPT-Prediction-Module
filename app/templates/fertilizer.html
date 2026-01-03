@@ -1,0 +1,217 @@
+{% extends 'layout.html' %} {% block body %}
+
+<style>
+  html body {
+    background-color: rgb(206, 206, 228);
+  }
+
+  /* Style for the error messages */
+  .error-message {
+    color: #d9534f; /* A shade of red */
+    font-size: 14px;
+    font-weight: bold;
+    display: none; /* Hidden by default */
+  }
+</style>
+<br /><br />
+<h2 style="text-align: center; margin: 0px; color: black">
+  <b>Get informed advice on fertilizer based on soil</b>
+</h2>
+<br />
+
+<div
+  style="
+    width: 350px;
+    height: auto;
+    margin: 0px auto;
+    color: black;
+    border-radius: 25px;
+    padding: 10px 10px;
+  "
+>
+  <form id="fert-form" method="POST" action="{{ url_for('fert_recommend') }}">
+    <div class="form-group">
+      <label for="Nitrogen" style="font-size: 17px"><b>Nitrogen</b></label>
+      <input
+        type="number"
+        class="form-control"
+        id="Nitrogen"
+        name="nitrogen"
+        placeholder="Enter the value (example:80)"
+        style="font-weight: bold"
+        required
+        min="0"
+        max="200"
+      />
+      <span class="error-message" id="NitrogenError">Please enter a value between 0 and 200.</span>
+    </div>
+
+    <div class="form-group">
+      <label for="Phosphorous" style="font-size: 17px"><b>Phosphorous</b></label>
+      <input
+        type="number"
+        class="form-control"
+        id="Phosphorous"
+        name="phosphorous"
+        placeholder="Enter the value (example:40)"
+        style="font-weight: bold"
+        required
+        min="0"
+        max="150"
+      />
+      <span class="error-message" id="PhosphorousError">Please enter a value between 0 and 150.</span>
+    </div>
+
+    <div class="form-group">
+      <label for="Pottasium" style="font-size: 17px"><b>Potassium</b></label>
+      <input
+        type="number"
+        class="form-control"
+        id="Pottasium"
+        name="pottasium"
+        placeholder="Enter the value (example:40)"
+        style="font-weight: bold"
+        required
+        min="0"
+        max="250"
+      />
+      <span class="error-message" id="PottasiumError">Please enter a value between 0 and 250.</span>
+    </div>
+    
+    <div class="form-group">
+      <label for="crop" style="font-size: 17px"><b>Crop you want to grow</b></label>
+      <select
+        name="cropname"
+        class="form-control"
+        id="crop"
+        style="font-weight: bold"
+        required
+      >
+        <option selected disabled>Select crop</option>
+        <option>rice</option>
+        <option>maize</option>
+        <option>chickpea</option>
+        <option>kidneybeans</option>
+        <option>pigeonpeas</option>
+        <option>mothbeans</option>
+        <option>mungbean</option>
+        <option>blackgram</option>
+        <option>lentil</option>
+        <option>pomegranate</option>
+        <option>banana</option>
+        <option>mango</option>
+        <option>grapes</option>
+        <option>watermelon</option>
+        <option>muskmelon</option>
+        <option>apple</option>
+        <option>orange</option>
+        <option>papaya</option>
+        <option>coconut</option>
+        <option>cotton</option>
+        <option>jute</option>
+        <option>coffee</option>
+      </select>
+      <span class="error-message" id="CropError">Please select a crop.</span>
+    </div>
+
+    <div class="d-flex justify-content-center">
+      <button
+        id="fert-predict-button"
+        type="submit"
+        class="btn btn-info"
+        style="
+          color: black;
+          font-weight: bold;
+          width: 130px;
+          height: 50px;
+          border-radius: 12px;
+          font-size: 21px;
+        "
+      >
+        Predict
+      </button>
+    </div>
+  </form>
+</div>
+
+<script>
+  // Validation setup
+  const fertForm = document.getElementById('fert-form');
+
+  const fertInputs = [
+    { id: 'Nitrogen', errorId: 'NitrogenError', min: 0, max: 200 },
+    { id: 'Phosphorous', errorId: 'PhosphorousError', min: 0, max: 150 },
+    { id: 'Pottasium', errorId: 'PottasiumError', min: 0, max: 250 }
+  ];
+
+  // Function to validate one field instantly
+  function validateField(inputInfo) {
+    const inputField = document.getElementById(inputInfo.id);
+    const errorField = document.getElementById(inputInfo.errorId);
+    const value = parseFloat(inputField.value);
+
+    if (isNaN(value) || value < inputInfo.min || value > inputInfo.max) {
+      errorField.style.display = 'block';
+      inputField.setCustomValidity("Invalid");
+    } else {
+      errorField.style.display = 'none';
+      inputField.setCustomValidity("");
+    }
+  }
+
+  // Attach input (real-time) event listener to each numeric field
+  fertInputs.forEach(inputInfo => {
+    const inputField = document.getElementById(inputInfo.id);
+    inputField.addEventListener('input', () => validateField(inputInfo));
+  });
+
+  // Validate crop selection
+  fertForm.addEventListener('submit', function (event) {
+    let isFormValid = true;
+    document.getElementById('CropError').style.display = 'none';
+
+    const cropSelect = document.getElementById('crop');
+    if (cropSelect.value === "Select crop" || cropSelect.value === "") {
+      document.getElementById('CropError').style.display = 'block';
+      isFormValid = false;
+    }
+
+    if (!isFormValid) {
+      event.preventDefault();
+    }
+  });
+
+  // Keep your Enter-to-next-input logic intact
+  document.addEventListener('DOMContentLoaded', function () {
+    const form = document.getElementById('fert-form');
+    const inputs = Array.from(form.querySelectorAll('input.form-control, select.form-control'));
+    const predictButton = document.getElementById('fert-predict-button');
+
+    form.addEventListener('keydown', function (event) {
+      if (event.key === 'Enter') {
+        event.preventDefault();
+        const currentInput = document.activeElement;
+        const currentIndex = inputs.indexOf(currentInput);
+
+        if (currentIndex > -1) {
+          if (currentIndex < inputs.length - 1) {
+            const nextInput = inputs[currentIndex + 1];
+
+            // prevent moving if current field is invalid
+            if (!currentInput.checkValidity()) {
+              currentInput.focus();
+            } else {
+              nextInput.focus();
+            }
+          } else {
+            if (form.checkValidity()) {
+              predictButton.click();
+            }
+          }
+        }
+      }
+    });
+  });
+</script>
+
+{% endblock %}
