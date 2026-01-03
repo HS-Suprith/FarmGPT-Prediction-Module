@@ -1,0 +1,1 @@
+# FarmGPT-Crop-Prediction-Fertiliser-Suggestion-Disease-Detection-and-Chatbot
